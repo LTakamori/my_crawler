@@ -32,11 +32,23 @@ class Crawler:
         pass
 
     def get_and_save_teacher_info(self, soup, teacher_id):
-        pass
-    # TODO: !!! parse and save
+        location = soup.find('h3')
+        if location is None:
+            return
+        teacher_info = location.parent
+        teacher_name = teacher_info.h3.string
+        info_table = teacher_info.find_all('p')
+        rate = info_table[0].string
+        rate_num = info_table[1].string
+        faculty = info_table[2].string
+        self.c.execute("INSERT INTO TEACHER_TABLE (TEACHER_ID, TEACHER_NAME, RATE, RATE_NUM, FACULTY)\
+                            values ({},'{}','{}','{}','{}')".format(teacher_id, teacher_name, rate, rate_num, faculty))
+        # TODO: might deal with out of range issue here
 
     def get_and_save_class_info(self, soup, teacher_id):
         class_table = soup.find("table")
+        if class_table is None:
+            return
         entry_list = class_table.tbody.find_all('tr')
         for entry in entry_list:
             values = entry.find_all('td')
@@ -46,10 +58,11 @@ class Crawler:
 
     def get_and_save_comment_info(self, soup, teacher_id):
         tables = soup.find_all("table")
+        if tables is None:
+            return
         if len(tables) == 2:
             comment_table = soup.find_all("table")[1]
         else:
-            print(teacher_id)
             return
         entry_list = comment_table.tbody.find_all('tr')
         for entry in entry_list:
