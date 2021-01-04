@@ -15,6 +15,7 @@ class Crawler:
     def run(self):
         for url in self.url_list:
             page = self.get_page(url)
+            print("Finished getting page: {}".format(url))
             soup = BeautifulSoup(page.text, 'lxml')
             teacher_id = int(url[41:])
             self.strategy(soup, teacher_id)
@@ -22,7 +23,7 @@ class Crawler:
 
     @staticmethod
     def get_page(url: str):
-        print("Starting getting page: {}".format(url))
+        print("Starting getting page: {}".format(url))  # TODO: Here!
         return requests.get(url)
 
     def strategy(self, soup, teacher_id):
@@ -49,6 +50,7 @@ class Crawler:
         class_table = soup.find("table")
         if class_table is None:
             return
+        # TODO: right here!!! class table not exist but comment table exit, WTF?, find by "h4" i think
         entry_list = class_table.tbody.find_all('tr')
         for entry in entry_list:
             values = entry.find_all('td')
@@ -58,15 +60,19 @@ class Crawler:
 
     def get_and_save_comment_info(self, soup, teacher_id):
         tables = soup.find_all("table")
+        # TODO: also here!!! class table not exist but comment table exit, WTF?, find by "h4" i think
         if tables is None:
             return
-        if len(tables) == 2:
+        if len(tables) == 3:
             comment_table = soup.find_all("table")[1]
         else:
             return
+
         entry_list = comment_table.tbody.find_all('tr')
         for entry in entry_list:
             items = entry.find_all('td')
+            if len(items) != 3:
+                return
             comment_time = items[0].string
             comment = self.sqliteEscape(items[1].string)
             approve_num = items[2].div.string
@@ -86,5 +92,7 @@ class Crawler:
             keyWord = keyWord.replace("&", "/&")
             keyWord = keyWord.replace("_", "/_")
             keyWord = keyWord.replace("(", "/(")
+            keyWord = keyWord.replace(")", "/)")
+            keyWord = keyWord.replace("^", "/^")
             keyWord = keyWord.replace(")", "/)")
         return keyWord
