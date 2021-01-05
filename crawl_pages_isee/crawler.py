@@ -1,6 +1,8 @@
 import requests
-from bs4 import BeautifulSoup, NavigableString
-import sqlite3
+from gevent import monkey
+monkey.patch_all()
+
+from bs4 import BeautifulSoup
 
 
 db_dir = "./fuck_fw.db"
@@ -10,27 +12,25 @@ class Crawler:
     def __init__(self, url_list: list, connection):
         self.url_list = url_list
         self.c = connection.cursor()
-        pass
 
     def run(self):
         for url in self.url_list:
             page = self.get_page(url)
-            print("Finished getting page: {}".format(url))
+            # print("Finished getting page: {}".format(url))
             soup = BeautifulSoup(page.text, 'lxml')
             teacher_id = int(url[41:])
             self.strategy(soup, teacher_id)
-        pass
+            # print("Finished page:{}".format(url))
 
     @staticmethod
     def get_page(url: str):
-        print("Starting getting page: {}".format(url))
+        # print("Starting getting page: {}".format(url))
         return requests.get(url)
 
     def strategy(self, soup, teacher_id):
         self.get_and_save_teacher_info(soup, teacher_id)
         self.get_and_save_class_info(soup, teacher_id)
         self.get_and_save_comment_info(soup, teacher_id)
-        pass
 
     def get_and_save_teacher_info(self, soup, teacher_id):
         location = soup.find('h3')
@@ -105,6 +105,6 @@ class Crawler:
             keyWord = keyWord.replace("_", "/_")
             keyWord = keyWord.replace("(", "/(")
             keyWord = keyWord.replace(")", "/)")
-            keyWord = keyWord.replace("^", " ")
+            keyWord = keyWord.replace("^", "/^")
             keyWord = keyWord.replace(")", "/)")
         return keyWord

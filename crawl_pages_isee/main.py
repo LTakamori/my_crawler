@@ -1,7 +1,7 @@
-from gevent import monkey; monkey.patch_all()
+from gevent import monkey
+monkey.patch_all()
+
 import gevent
-import requests
-from bs4 import BeautifulSoup
 import sqlite3
 import time
 
@@ -32,7 +32,7 @@ def main():
               COMMENT_TIME TEXT,
               CONTENT TEXT,
               APPROVE_NUM INT);''')
-    jobs = [gevent.spawn(crawler.run()) for crawler in crawler_list]
+    jobs = [gevent.spawn(crawler.run) for crawler in crawler_list]  # This can do, use run instead of run()
     gevent.joinall(jobs)
     connection.commit()
     connection.close()
