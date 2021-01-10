@@ -24,13 +24,16 @@ class Crawler:
 
     @staticmethod
     def get_page(url: str):
-        # print("Starting getting page: {}".format(url))
-        return requests.get(url)
+        print("Starting getting page: {}".format(url))
+        result = requests.get(url)
+        print("Finished getting page: {}".format(url))
+        return result
 
     def strategy(self, soup, teacher_id):
         self.get_and_save_teacher_info(soup, teacher_id)
         self.get_and_save_class_info(soup, teacher_id)
         self.get_and_save_comment_info(soup, teacher_id)
+
 
     def get_and_save_teacher_info(self, soup, teacher_id):
         location = soup.find('h3')
